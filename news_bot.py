@@ -64,42 +64,50 @@ def analyze_news_with_claude(news_articles):
         f"Titre: {article.get('headline', article.get('title', 'Sans titre'))}\n"
         f"Source: {article.get('source', 'Inconnue')}\n"
         f"Résumé: {article.get('summary', article.get('description', 'N/A'))[:200]}"
-        for article in news_articles[:5]  # Top 5 news
+        for article in news_articles[:15]  # Top 15 news pour couvrir tous les domaines
     ])
 
-    prompt = f"""Tu es un analyste expert en finance, trading et politique mondiale. Voici les dernières actualités majeures:
+    prompt = f"""Tu es un analyste expert. Voici les dernières actualités:
 
 {news_text}
 
 Ta mission:
-1. Sélectionne les 3-4 événements MAJEURS mondiaux (finance, trading, politique)
-2. Pour CHAQUE événement, donne:
-   - Ce qui s'est passé (1 ligne)
-   - TON ANALYSE et TON OPINION sur la situation (2-3 lignes)
-   - Les implications possibles
+Sélectionne 1-2 événements MAJEURS dans CHACUN de ces 5 domaines:
+🤖 IA (Intelligence Artificielle)
+📊 Trading Algo
+💰 Finance
+🏛️ Politique
+₿ Crypto
 
-Format (exemple):
-📈 Bitcoin franchit 125K$ dans un contexte de crise politique américaine.
+Pour CHAQUE événement, format COURT (6 lignes max):
+- Le fait (1-2 lignes concises)
+- Impact/Conséquence directe (2-3 lignes)
+- Ton avis expert (1-2 lignes)
 
-→ Mon analyse: Cette hausse reflète une perte de confiance dans les institutions traditionnelles. Les investisseurs cherchent des actifs décentralisés face à l'instabilité politique. Je pense que cette tendance va s'accélérer si le shutdown perdure, car les cryptos deviennent une vraie alternative refuge.
+Exemple:
+🤖 IA
+OpenAI lance GPT-5 avec raisonnement quantique, performances 10x supérieures.
+Impact: Révolution dans l'automatisation. Les entreprises sans IA avancée vont perdre en compétitivité. Microsoft et Google accélèrent leurs investissements.
+Avis: Game changer absolu. Acheter NVIDIA/Microsoft maintenant avant l'explosion. Le marché sous-estime encore l'ampleur du changement.
 
-🛢️ L'OPEC+ augmente sa production malgré le surplus mondial.
-
-→ Mon analyse: Décision surprenante qui montre des tensions internes à l'OPEC+. Certains membres ont besoin de revenus à court terme. Cela pourrait faire baisser les prix du pétrole et créer de nouvelles opportunités de trading sur les énergies.
+₿ CRYPTO
+Bitcoin dépasse 150K$ suite à l'adoption officielle par le Japon comme réserve nationale.
+Impact: Validation institutionnelle massive. Les autres pays asiatiques vont suivre. Flux de plusieurs milliards vers les ETF Bitcoin spot. Volatilité court-terme attendue.
+Avis: Consolidation probable à 145K avant continuation haussière. Opportunité d'achat sur correction. Target 200K d'ici 6 mois.
 
 IMPORTANT:
-- Focus sur événements MONDIAUX majeurs
-- Donne TON AVIS personnel et analyse
-- Émojis pertinents
+- 1-2 news PAR domaine (5 domaines = 5-10 news total)
+- Format COURT et percutant
 - SANS markdown (**, ##)
-- Ton direct et expert
+- Émojis pour chaque domaine
+- Avis tranché et actionnable
 """
 
     try:
         client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         message = client.messages.create(
             model="claude-sonnet-4-5-20250929",
-            max_tokens=2048,  # Plus de tokens pour l'analyse détaillée
+            max_tokens=3000,  # Plus de tokens pour couvrir les 5 domaines
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -183,18 +191,18 @@ def send_daily_news():
 
 
 def main_loop():
-    """Boucle principale - envoie des news tous les jours à 8h"""
+    """Boucle principale - envoie des news tous les jours à 8h heure française"""
     print("🤖 Bot Telegram News démarré!")
-    print(f"📅 Envoi quotidien programmé à 8h00")
+    print(f"📅 Envoi quotidien programmé à 8h00 (heure française)")
 
-    # Programme l'envoi quotidien à 8h
-    schedule.every().day.at("08:00").do(send_daily_news)
+    # Programme l'envoi quotidien à 6h UTC (8h heure française)
+    schedule.every().day.at("06:00").do(send_daily_news)
 
     # Envoi immédiat pour test (optionnel - commenter après test)
     print("\n🧪 Envoi de test immédiat...")
     send_daily_news()
 
-    print("\n⏰ En attente du prochain envoi à 8h00...")
+    print("\n⏰ En attente du prochain envoi à 8h00 (heure française)...")
 
     while True:
         try:
